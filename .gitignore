@@ -1,0 +1,9 @@
+.vscode
+imagens
+videos
+__pycache__
+.venv
+test**.py
+modelos_mediapipe_pose
+tempCodeRunnerFile.py
+.env
