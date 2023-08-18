@@ -1,38 +1,4 @@
-# 0 - nose
-# 1 - left eye (inner)
-# 2 - left eye
-# 3 - left eye (outer)
-# 4 - right eye (inner)
-# 5 - right eye
-# 6 - right eye (outer)
-# 7 - left ear
-# 8 - right ear
-# 9 - mouth (left)
-# 10 - mouth (right)
-# 11 - left shoulder
-# 12 - right shoulder
-# 13 - left elbow
-# 14 - right elbow
-# 15 - left wrist
-# 16 - right wrist
-# 17 - left pinky
-# 18 - right pinky
-# 19 - left index
-# 20 - right index
-# 21 - left thumb
-# 22 - right thumb
-# 23 - left hip
-# 24 - right hip
-# 25 - left knee
-# 26 - right knee
-# 27 - left ankle
-# 28 - right ankle
-# 29 - left heel
-# 30 - right heel
-# 31 - left foot index
-# 32 - right foot index
-
-landmark_codes = {
+landmark_codes_en = {
     'nose':0,
     'left_eye_inner':1,
     'left_eye' : 2,
@@ -67,3 +33,40 @@ landmark_codes = {
     'left_foot_index': 31,
     'right_foot_index': 32
 }
+
+landmark_codes_pt_br = {
+    'nariz':0,
+    'interior_olho_esquerdo':1,
+    'olho_esquerdo' : 2,
+    'exterior_olho_esquerdo' : 3,
+    'interior_olho_direito' : 4,
+    'olho_direito' : 5,
+    'exterior_olho_direito' : 6,
+    'orelha_esquerda' : 7,
+    'orelha_direita' : 8,
+    'boca_esquerda' : 9,
+    'boca_direita': 10,
+    'ombro_esquerdo': 11,
+    'ombro_direito': 12,
+    'cotovelo_esquerdo': 13,
+    'cotovelo_direito': 14,
+    'pulso_esquerdo': 15,
+    'pulso_direito': 16,
+    'mindinho_esquerdo': 17,
+    'mindinho_direito': 18,
+    'indicador_esquerdo': 19,
+    'indicador_direito': 20,
+    'polegar_esquerdo': 21,
+    'polegar_direito': 22,
+    'quadril_esquerdo': 23,
+    'quadril_direito': 24,
+    'joelho_esquerdo': 25,
+    'joelho_direito': 26,
+    'tornozelo_esquerdo': 27,
+    'tornozelo_direito': 28,
+    'calcanhar_esquerdo': 29,
+    'calcanhar_direito': 30,
+    'indicador_pe_esquerdo': 31,
+    'indicador_pe_direito': 32
+}
+
