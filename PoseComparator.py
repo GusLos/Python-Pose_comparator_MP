@@ -123,4 +123,11 @@ class PoseComparator():
     # return {'xy': sentido_xy, 'zx': sentido_zx, 'yz': sentido_yz}
     return np.array([sentido_xy, sentido_zx, sentido_yz])
 
+
+
+
+  @classmethod
+  def affine_transformation (cls) -> None:
+    pass # affine_transformation
+
   pass
