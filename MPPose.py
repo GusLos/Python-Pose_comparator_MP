@@ -306,7 +306,18 @@ class MPPose():
     self._mp_pose_init()
     pass # set_live_stream_method
 
-  pass
+  def set_show_live_stream(self, show_live_stream: bool) -> None:
+    '''
+    Set if the live stream result should be displayed or not.
+
+    ### Parameters
+        show_live_stream (bool):
+            true  - Image with the landmark result will be displayed.
+            false - Image with the landmark result will not be displayed, this allow you to build your own function to display the results and the image.
+    '''
+    self.show_live_stream = show_live_stream
+    self._mp_pose_init()
+  pass # set_show_live_stream
 
 if __name__ == '__main__':
   
