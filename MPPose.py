@@ -5,7 +5,6 @@ import numpy as np
 import cv2
 import os
 
-
 # class MPPose(metaclass=SingletonMeta):
 class MPPose():
   '''
@@ -78,8 +77,9 @@ class MPPose():
     if self.live_stream_method:
       try:
         self.live_stream_method(result, output_image, timestamp_ms)
-      except:
+      except Exception as e:
         print('Something went wrong in your live stream method.\n    See/Read `MPPose.live_stream_method_explained()`')
+        print(e)
       pass # if self.live_stream_method
 
     pass # live_stream_method
