@@ -26,7 +26,7 @@ class PoseComparator():
     pass
 
   @staticmethod
-  def director_angles(vector) -> np.array:
+  def director_angles(vector: np.array) -> np.array:
     '''Recebe vetor np.array , return np.array(i, j, k) em graus, melhor radianos?  p/ graus usar np.rad2deg()'''
     vector_module = np.sqrt(vector.dot(vector)) # módulo do vetor
     director_angle_i = np.rad2deg(np.arccos(vector[0]/vector_module))
@@ -51,12 +51,15 @@ class PoseComparator():
   @classmethod
   def angle_between_limbs(cls, start_end, common_end, final_end):
     '''Funciona apenas com world_pose_landmaks, retorna o angulo entre membros em graus, melhor radiano?'''
-    start_end_coordinates  = cls.landmark_to_array_default(start_end)
-    final_end_coordinates  = cls.landmark_to_array_default(final_end)
-    common_end_coordinates = cls.landmark_to_array_default(common_end)
+    try: # se já for array, n precisa transformar
+      start_end  = cls.landmark_to_array_default(start_end)
+      final_end  = cls.landmark_to_array_default(final_end)
+      common_end = cls.landmark_to_array_default(common_end)
+    except:
+      pass
 
-    limb_vector1 = cls.encontrar_vetor(common_end_coordinates, start_end_coordinates)
-    limb_vector2 = cls.encontrar_vetor(common_end_coordinates, final_end_coordinates)
+    limb_vector1 = cls.encontrar_vetor(common_end, start_end)
+    limb_vector2 = cls.encontrar_vetor(common_end, final_end)
 
     limbs_angle = cls.calcular_angulo_entre_vetores(limb_vector2, limb_vector1)
 
@@ -64,9 +67,16 @@ class PoseComparator():
     pass
 
   @classmethod
-  def analyse_limb(cls, start_end, final_end) -> np.array:
-    start_end_coordinates = cls.landmark_to_array_default(start_end)
-    final_end_coordinates = cls.landmark_to_array_default(final_end)
+  def analyse_limb(cls, start_end_landmark = None, final_end_landmark = None, start_end_array = None, final_end_array = None) -> np.array:
+    if start_end_landmark and final_end_landmark:
+      start_end_coordinates = cls.landmark_to_array_default(start_end_landmark)
+      final_end_coordinates = cls.landmark_to_array_default(final_end_landmark)
+    elif start_end_array.any() and final_end_array.any():
+      start_end_coordinates = start_end_array
+      final_end_coordinates = final_end_array
+
+    # assert start_end_coordinates and final_end_coordinates, 'At least one pair of values should be used, either a pair of landmark or array values.'
+    assert np.logical_and(start_end_coordinates, final_end_coordinates).sum() , 'At least one pair of values should be used, either a pair of landmark or array values.'
 
     limb_vector = cls.encontrar_vetor(start_end_coordinates, final_end_coordinates)
 
@@ -127,7 +137,29 @@ class PoseComparator():
 
 
   @classmethod
-  def affine_transformation (cls) -> None:
+  def affine_transformation (cls, base_model: np.array, input_pose: np.array):
+    '''
+    
+
+
+    Thanks bilgeckers from https://becominghuman.ai/
+    https://becominghuman.ai/single-pose-comparison-a-fun-application-using-human-pose-estimation-part-2-4fd16a8bf0d3
+    '''
+    pad = lambda x: np.hstack([x, np.ones((x.shape[0], 1))])
+    unpad = lambda x: x[:, :-1]
+
+    base = pad(base_model)
+    pose = pad(input_pose)
+
+    A, res, rank, s = np.linalg.lstsq(pose, base)
+    A[np.abs(A) < 1e-10] = 0
+
+    transform = lambda x: unpad(np.dot(pad(x), A))
+
+    input_transform = transform(input_pose)
+    print('input_t ', type(input_transform))
+    print('input_t ', type(A))
+    return input_transform, A
     pass # affine_transformation
 
   pass
