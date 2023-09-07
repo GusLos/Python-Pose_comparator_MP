@@ -20,6 +20,17 @@ class PoseComparator():
     pass
 
   @staticmethod
+  def landmarks_result_to_array(landmark_result_list: list) -> np.array:
+    '''Add visibility and presence ??'''
+    # TODO fazer esse metodo que trandforma a lista toda de landmark para array
+    landmark_result_array = []
+    for landmark in landmark_result_list:
+      landmark_result_array.append( np.array([landmark.x, landmark.y, landmark.z]) )
+      pass # for
+    return np.array(landmark_result_array)
+    pass # landmarks_result_to_array
+
+  @staticmethod
   def encontrar_vetor (ponto_inicial: np.array, ponto_final: np.array) -> np.array:
     '''Retorna Array'''
     return ponto_final - ponto_inicial
