@@ -21,8 +21,18 @@ class PoseComparator():
 
   @staticmethod
   def landmarks_result_to_array(landmark_result_list: list) -> np.array:
-    '''Add visibility and presence ??'''
-    # TODO fazer esse metodo que trandforma a lista toda de landmark para array
+    '''
+    Method receives a list of landmark result and turn it into an array.
+
+    ### Parameters
+      landmark_result_list (list[landmark]):
+        List of pose landmark, the result of MediaPipe pose detection.
+
+    ### Returns
+      landmark_result_array (np.array([np.array, ...])):
+        The results, but in array format.
+    '''
+    # Add visibility and presence ?
     landmark_result_array = []
     for landmark in landmark_result_list:
       landmark_result_array.append( np.array([landmark.x, landmark.y, landmark.z]) )
