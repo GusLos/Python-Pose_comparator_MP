@@ -9,12 +9,33 @@ class PoseComparator():
 
   @staticmethod
   def landmark_to_array_default(landmark: Landmark) -> np.array:
-    '''Tranforma/Retorna em array'''
+    '''
+    Receives a landmark and turn it into an array.
+
+    #### Parameters
+      landmark (Landmark):
+        One "landmark result" of MediaPipe pose detection, it should have x, y and z attributes.
+    
+    #### Returns
+      np.array:
+        The coordinates of the landmark in an array format.
+    '''
     return np.array([landmark.x, landmark.y, landmark.z])
     pass
 
   @staticmethod
   def landmark_to_array_as_int(landmark: Landmark, exponent: int = 5) -> np.array:
+    '''
+    Receives a landmark and turn it into an integer array. Same thing as `landmark_to_array_default`, but return an array with integers.
+
+    #### Parameters
+      landmark (Landmark):
+        One "landmark result" of MediaPipe pose detection, it should have x, y and z attributes.
+    
+    #### Returns
+      np.array:
+        The coordinates of the landmark in an (integer) array format.
+    '''
     result = np.power(10, exponent)
     return (np.array([landmark.x, landmark.y, landmark.z]) * result).astype(int)
     pass
@@ -41,14 +62,36 @@ class PoseComparator():
     pass # landmarks_result_to_array
 
   @staticmethod
-  def encontrar_vetor (ponto_inicial: np.array, ponto_final: np.array) -> np.array:
-    '''Retorna Array'''
-    return ponto_final - ponto_inicial
+  def create_vector (initial_point: np.array, end_point: np.array) -> np.array:
+    '''
+    Create an array given two points.
+
+    #### Parameters
+      initial_point (np.array):
+        An array with coordinates of the start of the vector.
+      end_point (np.array):
+        An array with coordinates of the end of the vector.
+    
+    #### Returns
+      np.array:
+        An vector, in array format, from the start point to the end point.
+    '''
+    return end_point - initial_point
     pass
 
   @staticmethod
   def director_angles(vector: np.array) -> np.array:
-    '''Recebe vetor np.array , return np.array(i, j, k) em graus, melhor radianos?  p/ graus usar np.rad2deg()'''
+    '''
+    Calculates the directors angles for a given vector.
+
+    #### Parameters
+      vector (np.array):
+        A vector in array format.
+    
+    #### Returns
+      np.array
+        An array with the director angles: i, j, k (respectively) in degree.
+    '''
     vector_module = np.sqrt(vector.dot(vector)) # módulo do vetor
     director_angle_i = np.rad2deg(np.arccos(vector[0]/vector_module))
     director_angle_j = np.rad2deg(np.arccos(vector[1]/vector_module))
@@ -60,7 +103,20 @@ class PoseComparator():
     pass # director_angles
   
   @staticmethod
-  def calcular_angulo_entre_vetores(vector1, vector2):
+  def angle_between_vectors(vector1: np.array, vector2: np.array) -> float:
+    '''
+    Calculates the angle between two given vectors.
+
+    #### Parameters
+      vector1 (np.array):
+        A vector in array format.
+      vector2 (np.array):
+        A vector in array format.
+      
+    #### Returns
+      angle (float)
+        The angle between two vectors.
+    '''
     dot_product = np.dot(vector1, vector2)
     magnitude1 = np.linalg.norm(vector1)
     magnitude2 = np.linalg.norm(vector2)
@@ -71,7 +127,21 @@ class PoseComparator():
 
   @classmethod
   def angle_between_limbs(cls, start_end, common_end, final_end):
-    '''Funciona apenas com world_pose_landmaks, retorna o angulo entre membros em graus, melhor radiano?'''
+    '''
+    Given three pose landmarks (in array format or landmark format), calculates the angle shaped by these limbs.
+
+    #### Parameters
+      start_end (np.array or landmark):
+        One of the extremes points, cannot be the common point, either in array format or landmark format (has the attributes x, y, z)
+      common_end (np.array or landmark):
+        The common point betweed the other two, either in array format or landmark format (has the attributes x, y, z)
+      final_end (np.array or landmark):
+        One of the extremes points, cannot be the common point, either in array format or landmark format (has the attributes x, y, z)
+
+    #### Returns
+      angle (float):
+        Angle shaped by the given three points.
+    '''
     try: # se já for array, n precisa transformar
       start_end  = cls.landmark_to_array_default(start_end)
       final_end  = cls.landmark_to_array_default(final_end)
@@ -79,27 +149,44 @@ class PoseComparator():
     except:
       pass
 
-    limb_vector1 = cls.encontrar_vetor(common_end, start_end)
-    limb_vector2 = cls.encontrar_vetor(common_end, final_end)
+    limb_vector1 = cls.create_vector(common_end, start_end)
+    limb_vector2 = cls.create_vector(common_end, final_end)
 
-    limbs_angle = cls.calcular_angulo_entre_vetores(limb_vector2, limb_vector1)
+    limbs_angle = cls.angle_between_vectors(limb_vector2, limb_vector1)
 
     return limbs_angle
     pass
 
   @classmethod
-  def analyse_limb(cls, start_end_landmark = None, final_end_landmark = None, start_end_array = None, final_end_array = None) -> np.array:
-    if start_end_landmark and final_end_landmark:
-      start_end_coordinates = cls.landmark_to_array_default(start_end_landmark)
-      final_end_coordinates = cls.landmark_to_array_default(final_end_landmark)
-    elif start_end_array.any() and final_end_array.any():
-      start_end_coordinates = start_end_array
-      final_end_coordinates = final_end_array
+  def analyse_limb(cls, start_point_landmark = None, final_point_landmark = None, start_point_array = None, final_point_array = None) -> np.array:
+    '''
+    Calculates the directors angles of the limb, given the start point and final point.
+
+    #### Parameters
+      start_point_landmark (landmark):
+        The star point of the limb in landmark format.
+      final_point_landmark (landmark):
+        The final point of the limb in landmark format.
+      start_point_array (np.array):
+        The final point of the limb in array format.
+      final_point_array (np.array):
+        The final point of the limb in array format.
+    
+    #### Returns
+      director angles (np.array):
+        An array with the director angles: i, j, k (respectively) in degree.
+    '''
+    if start_point_landmark and final_point_landmark:
+      start_end_coordinates = cls.landmark_to_array_default(start_point_landmark)
+      final_end_coordinates = cls.landmark_to_array_default(final_point_landmark)
+    elif start_point_array.any() and final_point_array.any():
+      start_end_coordinates = start_point_array
+      final_end_coordinates = final_point_array
 
     # assert start_end_coordinates and final_end_coordinates, 'At least one pair of values should be used, either a pair of landmark or array values.'
     assert np.logical_and(start_end_coordinates, final_end_coordinates).sum() , 'At least one pair of values should be used, either a pair of landmark or array values.'
 
-    limb_vector = cls.encontrar_vetor(start_end_coordinates, final_end_coordinates)
+    limb_vector = cls.create_vector(start_end_coordinates, final_end_coordinates)
 
     limb_director_angle = cls.director_angles(limb_vector)
 
@@ -107,60 +194,138 @@ class PoseComparator():
     pass
 
   @staticmethod
-  def isLeft(inicio, meio, fim) -> list:
-    '''Testar (recebe pontos), retorna lista [T/F , num]'''
-    x = ((meio[0] - inicio[0])*(fim[1] - inicio[1]) - (meio[1] - inicio[1])*(fim[0] - inicio[0]))
+  def isLeft(start, middle, end) -> float:
+    '''
+    checks if the end point is to the left of the line.
+
+    #### Parameters
+      start (np.array or int or float):
+        Coordinate of a point in the line.
+      middle
+        Coordinate of a different point in the line, that connects the start to the end.
+      end
+        Coordinate of a point outside the line.
+        
+    #### Returns
+      float:
+        If returned number is greater than zero (> 0), end point is to the left of the line.
+    '''
+    x = ((middle[0] - start[0])*(end[1] - start[1]) - (middle[1] - start[1])*(end[0] - start[0]))
     # return [x > 0 , x]
     return x
     pass
 
   @classmethod
-  def sentido_XY (cls, ponto_inicial: Landmark, ponto_meio: Landmark, ponto_final: Landmark) -> bool:
-    '''Testar
-    ! fazer mecanismo para margem de erro'''
+  def isLeft_XY (cls, start_point: Landmark, middle_point: Landmark, final_point: Landmark) -> float:
+    '''
+    Caution
+    It should checks if the final landmark (final point) is to the left of the line made by the other two.
+    
+    #### Parameters
+      start_point (Landmark):
+        The start landmark point (it needs to have x, y and z attributes).
+      middle_point (Landmark):
+        The middle landmark point (it needs to have x, y and z attributes).
+      final_point (Landmark):
+        The final landmark point (it needs to have x, y and z attributes).
+
+    #### Returns
+      float:
+        If returned number is greater than zero (> 0), final point is to the left of the line.
+    '''
     # ponto_inicial_XY = [ponto_inicial[0] , ponto_inicial[1]]
     # ponto_meio_XY    = [ponto_meio[0]    , ponto_meio[1]   ]
     # ponto_final_XY   = [ponto_final[0]   , ponto_final[1]  ]
-    ponto_inicial_XY = [ponto_inicial.x , ponto_inicial.y]
-    ponto_meio_XY    = [ponto_meio.x    , ponto_meio.y   ]
-    ponto_final_XY   = [ponto_final.x   , ponto_final.y  ]
-    return cls.isLeft(ponto_inicial_XY, ponto_meio_XY, ponto_final_XY)
+    start_point_XY = [start_point.x , start_point.y]
+    middle_point_XY    = [middle_point.x    , middle_point.y   ]
+    final_point_XY   = [final_point.x   , final_point.y  ]
+    return cls.isLeft(start_point_XY, middle_point_XY, final_point_XY)
 
   @classmethod
-  def sentido_ZX (cls, ponto_inicial, ponto_meio, ponto_final) -> bool:
-    '''Testar
-    ! fazer mecanismo para margem de erro'''
-    ponto_inicial_ZX = [ponto_inicial.z , ponto_inicial.x]
-    ponto_meio_ZX    = [ponto_meio.z    , ponto_meio.x   ]
-    ponto_final_ZX   = [ponto_final.z   , ponto_final.x  ]
-    return cls.isLeft(ponto_inicial_ZX, ponto_meio_ZX, ponto_final_ZX)
-
-  @classmethod
-  def sentido_YZ (cls, ponto_inicial: Landmark, ponto_meio: Landmark, ponto_final: Landmark) -> bool:
-    '''Testar
-    ! fazer mecanismo para margem de erro'''
-    ponto_inicial_YZ = [ponto_inicial.y , ponto_inicial.z]
-    ponto_meio_YZ    = [ponto_meio.y    , ponto_meio.z   ]
-    ponto_final_YZ   = [ponto_final.y   , ponto_final.z  ]
-    return cls.isLeft(ponto_inicial_YZ, ponto_meio_YZ, ponto_final_YZ)
-
-  @classmethod
-  def sentido (cls, ponto_inicial: Landmark, ponto_meio: Landmark, ponto_final: Landmark):
-    '''Testar
-    ! fazer mecanismo para margem de erro'''
-    sentido_xy = cls.sentido_XY(ponto_inicial, ponto_meio, ponto_final)
-    sentido_zx = cls.sentido_ZX(ponto_inicial, ponto_meio, ponto_final)
-    sentido_yz = cls.sentido_YZ(ponto_inicial, ponto_meio, ponto_final)
-    # return {'xy': sentido_xy, 'zx': sentido_zx, 'yz': sentido_yz}
-    return np.array([sentido_xy, sentido_zx, sentido_yz])
-
-
-
-
-  @classmethod
-  def affine_transformation (cls, base_model: np.array, input_pose: np.array):
+  def isLeft_ZX (cls, start_point, middle_point, final_point) -> bool:
     '''
+    Caution
+    It should checks if the final landmark (final point) is to the left of the line made by the other two.
     
+    #### Parameters
+      start_point (Landmark):
+        The start landmark point (it needs to have x, y and z attributes).
+      middle_point (Landmark):
+        The middle landmark point (it needs to have x, y and z attributes).
+      final_point (Landmark):
+        The final landmark point (it needs to have x, y and z attributes).
+
+    #### Returns
+      float:
+        If returned number is greater than zero (> 0), final point is to the left of the line.
+    '''
+    start_point_ZX = [start_point.z , start_point.x]
+    middle_point_ZX    = [middle_point.z    , middle_point.x   ]
+    final_point_ZX   = [final_point.z   , final_point.x  ]
+    return cls.isLeft(start_point_ZX, middle_point_ZX, final_point_ZX)
+
+  @classmethod
+  def isLeft_YZ (cls, start_point: Landmark, middle_point: Landmark, final_point: Landmark) -> float:
+    '''
+    Caution
+    It should checks if the final landmark (final point) is to the left of the line made by the other two.
+    
+    #### Parameters
+      start_point (Landmark):
+        The start landmark point (it needs to have x, y and z attributes).
+      middle_point (Landmark):
+        The middle landmark point (it needs to have x, y and z attributes).
+      final_point (Landmark):
+        The final landmark point (it needs to have x, y and z attributes).
+
+    #### Returns
+      float:
+        If returned number is greater than zero (> 0), final point is to the left of the line.
+    '''
+    start_point_YZ  = [start_point.y , start_point.z ]
+    middle_point_YZ = [middle_point.y, middle_point.z]
+    final_point_YZ  = [final_point.y , final_point.z ]
+    return cls.isLeft(start_point_YZ, middle_point_YZ, final_point_YZ)
+
+  @classmethod
+  def isLeft_XYZ (cls, start_point: Landmark, middle_point: Landmark, final_point: Landmark) -> np.array:
+    '''
+    Caution
+    It should checks if the final landmark (final point) is to the left of the line made by the other two.
+    
+    #### Parameters
+      start_point (Landmark):
+        The start landmark point (it needs to have x, y and z attributes).
+      middle_point (Landmark):
+        The middle landmark point (it needs to have x, y and z attributes).
+      final_point (Landmark):
+        The final landmark point (it needs to have x, y and z attributes).
+
+    #### Returns
+      np.array:
+        An array checking if isLeft xy, zx and yz (respectively), if number is greater than zero (> 0), final point is to the left of the line (in that plan).
+    '''
+    isLeft_xy = cls.isLeft_XY(start_point, middle_point, final_point)
+    isLeft_zx = cls.isLeft_ZX(start_point, middle_point, final_point)
+    isLeft_yz = cls.isLeft_YZ(start_point, middle_point, final_point)
+    # return {'xy': isLeft_xy, 'zx': isLeft_zx, 'yz': isLeft_yz}
+    return np.array([isLeft_xy, isLeft_zx, isLeft_yz])
+
+  @classmethod
+  def affine_transformation (cls, base_model: np.array, input_pose: np.array) -> tuple[np.array, np.array]:
+    '''
+    Calculates the affine transformation for the input model.
+
+    #### Parameters
+      base_model (np.array):
+        An array of the base model.
+      input_pose (np.array)
+        An array with the input pose model.
+
+    #### Returns
+      tuple[ np.array, np.array ]
+      (input_transform , A)
+        The input transformed to fit the model.
 
 
     Thanks bilgeckers from https://becominghuman.ai/
@@ -168,18 +333,12 @@ class PoseComparator():
     '''
     pad = lambda x: np.hstack([x, np.ones((x.shape[0], 1))])
     unpad = lambda x: x[:, :-1]
-
     base = pad(base_model)
     pose = pad(input_pose)
-
     A, res, rank, s = np.linalg.lstsq(pose, base)
     A[np.abs(A) < 1e-10] = 0
-
     transform = lambda x: unpad(np.dot(pad(x), A))
-
     input_transform = transform(input_pose)
-    print('input_t ', type(input_transform))
-    print('input_t ', type(A))
     return input_transform, A
     pass # affine_transformation
 
