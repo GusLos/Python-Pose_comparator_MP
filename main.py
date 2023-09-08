@@ -4,6 +4,8 @@ from dotenv import dotenv_values
 import numpy as np
 import cv2
 import os
+from mediapipe.framework.formats import landmark_pb2
+from mediapipe import solutions
 
 from mediapipe.tasks.python.vision.pose_landmarker import PoseLandmarkerResult
 from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark
@@ -18,21 +20,22 @@ def update_array(target_array: np.array, number: int or float) -> np.array:
     return target_array
     pass
 
-def update_pose_smooth_normalized(result):
+def update_pose_smooth_normalized(result_array=None, result=None , n=10):
     global pose_now_smooth
-    for landmark_id in pose_now_smooth.keys(): 
-        pose_now_smooth[landmark_id].x = update_array(pose_now_smooth[landmark_id].x, result.pose_world_landmarks[0][landmark_id].x)
-        pose_now_smooth[landmark_id].y = update_array(pose_now_smooth[landmark_id].y, result.pose_world_landmarks[0][landmark_id].y)
-        pose_now_smooth[landmark_id].z = update_array(pose_now_smooth[landmark_id].z, result.pose_world_landmarks[0][landmark_id].z)
-        pose_now_smooth[landmark_id].presence = update_array(pose_now_smooth[landmark_id].presence, result.pose_world_landmarks[0][landmark_id].presence)
-        pose_now_smooth[landmark_id].visibility = update_array(pose_now_smooth[landmark_id].visibility, result.pose_world_landmarks[0][landmark_id].visibility)
-    
-        # pose_now_smooth_normalized[landmark_id].x = update_array(pose_now_smooth_normalized[landmark_id].x, result.pose_landmarks[0][landmark_id].x)
-        # pose_now_smooth_normalized[landmark_id].y = update_array(pose_now_smooth_normalized[landmark_id].y, result.pose_landmarks[0][landmark_id].y)
-        # pose_now_smooth_normalized[landmark_id].z = update_array(pose_now_smooth_normalized[landmark_id].z, result.pose_landmarks[0][landmark_id].z)
-        # pose_now_smooth_normalized[landmark_id].presence = update_array(pose_now_smooth_normalized[landmark_id].presence, result.pose_landmarks[0][landmark_id].presence)
-        # pose_now_smooth_normalized[landmark_id].visibility = update_array(pose_now_smooth_normalized[landmark_id].visibility, result.pose_landmarks[0][landmark_id].visibility)
-        pass # for
+    if result:
+        for landmark_id in pose_now_smooth.keys(): 
+            pose_now_smooth[landmark_id].x = update_array(pose_now_smooth[landmark_id].x, result.pose_world_landmarks[0][landmark_id].x)
+            pose_now_smooth[landmark_id].y = update_array(pose_now_smooth[landmark_id].y, result.pose_world_landmarks[0][landmark_id].y)
+            pose_now_smooth[landmark_id].z = update_array(pose_now_smooth[landmark_id].z, result.pose_world_landmarks[0][landmark_id].z)
+            pose_now_smooth[landmark_id].presence = update_array(pose_now_smooth[landmark_id].presence, result.pose_world_landmarks[0][landmark_id].presence)
+            pose_now_smooth[landmark_id].visibility = update_array(pose_now_smooth[landmark_id].visibility, result.pose_world_landmarks[0][landmark_id].visibility)
+            pass # for
+        return
+
+    for landmark in range(len(pose_now_smooth)):
+        pose_now_smooth[landmark] = ((pose_now_smooth[landmark]* (n-1)) + result_array[landmark]) / n
+        pass
+    return
     pass # update_pose_smooth_normalized
 
 def coordinates(id):
@@ -40,7 +43,8 @@ def coordinates(id):
     x = pose_now_smooth[id].x.mean()
     y = pose_now_smooth[id].y.mean()
     z = pose_now_smooth[id].z.mean()
-    return NormalizedLandmark(x=x, y=y, z=z)
+    # return NormalizedLandmark(x=x, y=y, z=z)
+    return np.array([x, y, z])
     pass
 
 def verificar_angulo(ang_padrao, ang_teste, margem_erro: int = 2):
@@ -51,91 +55,120 @@ def verificar_diretores(diretor_padrao, diretor_teste, margem_erro: int = 2):
     return all(diretor_teste <= diretor_padrao + margem_erro) and all(diretor_teste >= diretor_padrao - margem_erro)
     pass # verificar_diretores
 
+def select_torso(array_result=None, list_result=None) -> np.array:
+    '''
+    'ombro_esquerdo': 11,   # 0
+    'ombro_direito': 12,    # 1
+    'cotovelo_esquerdo': 13,# 2
+    'cotovelo_direito': 14, # 3
+    'pulso_esquerdo': 15,   # 4
+    'pulso_direito': 16,    # 5
+    '''
+    if list_result:
+        list_torso = list_result.pose_world_landmarks[0][11: 17]
+        torso_array = np.array(list_torso)
+        return torso_array
+
+
+    torso_array = array_result[11:17]
+    return torso_array
+    pass # select_torso
+
+def _to_array() -> np.array:
+    global pose_now_smooth
+    list_result = []
+    for landmark_id in pose_now_smooth.keys():
+        # landmark = []
+        # landmark.append(coordinates(landmark_id))
+        list_result.append(coordinates(landmark_id))
+        pass # for
+    return np.array(list_result)
+    pass
+
 def live_stream_function(result, output_image, timestamp_ms):
     global pose_now_smooth
     global standard_pose
     os.system('cls')
-    # print(type(result.pose_landmarks[0][0]))
-    # PoseLandmarkerResult()
-    # NormalizedLandmark()
+
+    # result_array = PC.landmarks_result_to_array(result.pose_world_landmarks[0])
+    update_pose_smooth_normalized(result=result)
+
+    result_array = _to_array()
+    standard_pose_torso = select_torso(array_result=standard_pose)
+
+    result_transform, A_torso = PC.affine_transformation(standard_pose_torso, result_array)
+
+
+    # Para um array com todas as landmarks
+    # right_arm_angle     = PC.angle_between_limbs(result_transform[12], result_transform[14], result_transform[16])
+    # right_forearm_angle = PC.angle_between_limbs(result_transform[14], result_transform[12], result_transform[11])
     
-    update_pose_smooth_normalized(result)
+    # Para array q tem apenas o torso em ordem (11 até 16)
+    right_arm_angle     = PC.angle_between_limbs(result_transform[1], result_transform[3], result_transform[5])
+    right_forearm_angle = PC.angle_between_limbs(result_transform[3], result_transform[1], result_transform[0])
 
-    right_arm_director_now     = PC.analyse_limb(coordinates(14), coordinates(16))
-    right_forearm_director_now = PC.analyse_limb(coordinates(12), coordinates(14))
-    right_arm_angle_now        = PC.angle_between_limbs(coordinates(16), coordinates(14), coordinates(12))
+    # Para array que possui todas as landmarks
+    # right_arm_director     = PC.analyse_limb(start_point_array = result_transform[14], final_point_array = result_transform[16])
+    # right_forearm_director = PC.analyse_limb(start_point_array = result_transform[12], final_point_array = result_transform[14])
 
-    right_arm_angle_ok        = verificar_angulo(standard_pose['right']['arm']['angle'], right_arm_angle_now,2)
-    right_arm_director_ok     = verificar_diretores(standard_pose['right']['arm']['director'], right_arm_director_now,2)
-    right_forearm_director_ok = verificar_diretores(standard_pose['right']['forearm']['director'], right_forearm_director_now,2)
+    # Para array q tem apenas o torso em ordem (11 até 16)
+    right_arm_director     = PC.analyse_limb(start_point_array = result_transform[3], final_point_array = result_transform[5])
+    right_forearm_director = PC.analyse_limb(start_point_array = result_transform[1], final_point_array = result_transform[3])
 
-    if right_arm_angle_ok:
+    # Para array que possui todas as landmarks
+    # shoulders_director = PC.analyse_limb(start_point_array = standard_pose[11], final_point_array = standard_pose[12])
+
+    # Para array q tem apenas o torso em ordem (11 até 16)
+    shoulders_director = PC.analyse_limb(start_point_array = standard_pose[0], final_point_array = standard_pose[1])
+
+    result_pose_jason = {
+        'membros_superiores' : {
+            'direito' : {
+                'braco': {
+                    'angulo':  right_arm_angle,
+                    'diretor': right_arm_director,
+                },
+                'antebraco': {
+                    'angulo':  right_forearm_angle,
+                    'diretor': right_forearm_director,
+                },
+            },
+            'esquerdo': {
+                'braco': {
+                    'angulo':  0,
+                    'diretor': np.array([0, 0, 0]),
+                },
+                'antebraco': {
+                    'angulo':  0,
+                    'diretor': np.array([0, 0, 0]),
+                },
+            },
+        },
+        'ombros': shoulders_director,   # só diretor ? ou ang tambem com o eixo X?
+        'pescoco': np.array([5, 5, 5]), # só diretor ? ou ang tambem com o eixo y?
+    }
+
+    model_arm_angle = model_pose_jason['membros_superiores']['direito']['braco']['angulo']
+
+    print('input angle: ', right_arm_angle)
+    print('model angle: ', model_arm_angle)
+
+    ang_ok = verificar_angulo(model_arm_angle, right_arm_angle, 2)
+
+    if ang_ok:
         print('\033[32m')
+        print('Ang OK')
+        pass
     else:
         print('\033[31m')
-
-    print('Angulo na imagem: ', standard_pose['right']['arm']['angle'])
-    print('Seu angulo: ', right_arm_angle_now)
-    print('Angulo está ', 'ok' if right_arm_angle_ok else 'not ok')
-
-    # FUNCIONA
-    if right_arm_director_ok:
-        print('\033[32m')
-    else:
-        print('\033[31m')
-    print('Braço da imagem tem diretores: ', standard_pose['right']['arm']['director'])
-    print('Seu braço tem diretores: ', right_arm_director_now)
-    print('Angulo está ', 'ok' if right_arm_director_ok else 'not ok')
-    # if (standard_pose[1][0] < resposta_diretor_braco_d[0]):
-    #     print('Trazer pulso direito mais para esquerda (mais perto de vc).')
-    #     pass
-    # else:
-    #     print('Trazer pulso mais para a direita (mais longe de vc).')
-    #     pass
-    # FIM FUNCIONA
-
-    # FUNCIONA +-
-    # print(standard_pose[1][1])
-    # print(resposta_diretor_braco_d[1])
-    # if (standard_pose[1][1] < resposta_diretor_braco_d[1]):
-    #     print('Trazer pulso direito mais para baixo.')
-    #     pass
-    # else:
-    #     print('Trazer pulso mais para cima.')
-    #     pass
-    # FIM FUNCIONA +-
-
-
-    # print(standard_pose[1][2])
-    # print(resposta_diretor_braco_d[2])
-    # if (standard_pose[1][2] < resposta_diretor_braco_d[2]):
-    #     print('Trazer pulso direito mais para frente.')
-    #     pass
-    # else:
-    #     print('Trazer pulso mais para traz.')
-    #     pass
-
-
-
-
-    # print('Diretor braco ', 'ok' if diretor_braco_d_ok else 'not ok')
-
-    # print(pose_standard[2])
-    # print(resposta_diretor_antebraco_d)
-    # print('Diretor antebraco ', 'ok' if diretor_antebraco_d_ok else 'not ok')
-
-    # if angulo_braco_d_ok and diretor_braco_d_ok and diretor_antebraco_d_ok:
-    #     print('POSE OK')
-
-    # print(resposta_angulo)
-
-
-    # sentido_braco_d = PC.sentido(coordinates(12), coordinates(14), coordinates(16))
-
-    # print(sentido_braco_standard_d)
-    # print(sentido_braco_d)
+        print('Ang Nao OK')
+        pass
 
     print('\033[37m')
+
+    print(result_pose_jason)
+
+    return
     pass # live_stream_function
 
 if __name__ == '__main__':
@@ -143,6 +176,7 @@ if __name__ == '__main__':
         # Lendo váriaveis
     dotenv = dotenv_values(".env")
     model_path  = dotenv['MODEL_PATH_FULL']
+    # model_path  = dotenv['MODEL_PATH_HEAVY']
     model_image = dotenv['MODEL_IMAGE']
     # Iniciando o modelo
     mppose = MPPose(model_path, 'image')
@@ -156,34 +190,47 @@ if __name__ == '__main__':
     cv2.imshow('Iagem', cv2.cvtColor(standard_image, cv2.COLOR_RGB2BGR))
     # cv2.waitKey(0)
 
-    standard_right_arm_director     = PC.analyse_limb(standard[1].pose_world_landmarks[0][14], standard[1].pose_world_landmarks[0][16])
-    standard_right_forearm_director = PC.analyse_limb(standard[1].pose_world_landmarks[0][12], standard[1].pose_world_landmarks[0][14])
-    standard_right_angle        = PC.angle_between_limbs(standard[1].pose_world_landmarks[0][16], standard[1].pose_world_landmarks[0][14], standard[1].pose_world_landmarks[0][12])
+    standard_pose = PC.landmarks_result_to_array(standard[1].pose_world_landmarks[0])
 
-    standard_right_arm_direction = PC.sentido(standard[1].pose_world_landmarks[0][12], standard[1].pose_world_landmarks[0][14], standard[1].pose_world_landmarks[0][16])
+    standard_right_arm_director     = PC.analyse_limb(start_point_array = standard_pose[14], final_point_array = standard_pose[16])
+    standard_right_forearm_director = PC.analyse_limb(start_point_array = standard_pose[12], final_point_array = standard_pose[14])
+    standard_shoulder_angle         = PC.analyse_limb(start_point_array = standard_pose[11], final_point_array = standard_pose[12])
+    standard_right_arm_angle        = PC.angle_between_limbs(standard_pose[12], standard_pose[14], standard_pose[16])
+    standard_right_forearm_angle    = PC.angle_between_limbs(standard_pose[14], standard_pose[12], standard_pose[11])
 
-    standard_pose = {
-        'right': {
-            'arm': {
-                'director': standard_right_arm_director,
-                'angle': standard_right_angle,
-                'direction': standard_right_arm_direction
+    model_pose_jason = {
+        'membros_superiores' : {
+            'direito' : {
+                'braco': {
+                    'angulo':  standard_right_arm_angle,
+                    'diretor': standard_right_arm_director,
+                },
+                'antebraco': {
+                    'angulo':  standard_right_forearm_angle,
+                    'diretor': standard_right_forearm_director,
+                },
             },
-            'forearm': {
-                'director': standard_right_forearm_director
-            }
+            'esquerdo': {
+                'braco': {
+                    'angulo':  0,
+                    'diretor': np.array([0, 0, 0]),
+                },
+                'antebraco': {
+                    'angulo':  0,
+                    'diretor': np.array([0, 0, 0]),
+                },
+            },
         },
-        'left': {
-            'arm': {}
-        }
+        'ombros': standard_shoulder_angle,   # só diretor ? ou ang tambem com o eixo X?
+        'pescoco': np.array([5, 5, 5]), # só diretor ? ou ang tambem com o eixo y?
     }
 
     # Fim analisar imagem ----------------------------------------------------------------------------------------------
 
     # Area de testes ----------------------------------------------------------------------------------------------
     
+    # Método 1 para salvar dados: criar array q salva 16 dados (em array) e depois faz a média
     nn = 16
-    # right_arm = [16, 14, 12]
     
     pose_now_smooth = {
         11: NormalizedLandmark(x= np.arange(nn) , y= np.arange(nn), z= np.arange(nn), visibility= np.arange(nn), presence= np.arange(nn)),
@@ -192,13 +239,22 @@ if __name__ == '__main__':
         14: NormalizedLandmark(x= np.arange(nn) , y= np.arange(nn), z= np.arange(nn), visibility= np.arange(nn), presence= np.arange(nn)),
         15: NormalizedLandmark(x= np.arange(nn) , y= np.arange(nn), z= np.arange(nn), visibility= np.arange(nn), presence= np.arange(nn)),
         16: NormalizedLandmark(x= np.arange(nn) , y= np.arange(nn), z= np.arange(nn), visibility= np.arange(nn), presence= np.arange(nn))
-    }    
+    }
+
+    # Método 2 para salvar dados: fazer um array com um dado para cada landmark, na hora de tirar a média, multiplicar por um número (15) e adicionar o input, e dividir pelo "total" (16) (15 números iguais + o input) 
+    #   media = ((ja_salvo) * 15 + input) / 16
+
+    # pose_now_smooth = standard_pose
+
+    # Método 3 juntar o 1 e 2, fazer um array de arrays
+    # ??
 
     # Fim area de testes ------------------------------------------------------------------------------------------
 
     # Trocando o modelo
     mppose.set_modo_operacao('live_stream')
     mppose.set_live_stream_method(live_stream_function)
+    mppose.set_show_live_stream(True)
     # Definindo webcam como captura de imagem
     cap = cv2.VideoCapture(0)
     # Verifica se consegui abrir a camera
@@ -220,6 +276,7 @@ if __name__ == '__main__':
 
         # Comando para parar o programa
         if cv2.waitKey(1) == ord('q'):
+            print('Terminando o programa, até mais.')
             break
             pass#if
         pass#while
