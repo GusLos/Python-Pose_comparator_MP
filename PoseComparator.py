@@ -342,4 +342,84 @@ class PoseComparator():
     return input_transform, A
     pass # affine_transformation
 
+  @classmethod
+  def array_of_landmarks_to_array_array (cls, land_arr):
+    for land in range(len(land_arr)):
+      land_arr[land] = cls.landmark_to_array_default(land_arr[land])
+    return land_arr
+    pass
+
+  @classmethod
+  def analyse_torso_w_affine(cls, model_landmarks_result, input_landmarks_result) -> dict:
+    '''
+    Given a model landmarks result and a input landmarks result, analyse the torso, returning the angle and directors of the upper limbs.
+
+    #### Parameters
+      model_landmarks_result (landmark_results):
+        Results of the MediaPipe pose detection for the model pose.
+      input_landmarks_result (landmark_results):
+        Results of the MediaPipe pose detection for the input pose.
+    
+    #### Results
+      dict:
+        Dictionary with the angles and directors for the limbs.
+    '''
+    # input_torso = input_landmarks_result.pose_world_landmarks[0][11: 17]
+    # model_torso = model_landmarks_result.pose_world_landmarks[0][11: 17]
+    input_torso = input_landmarks_result[0][11: 17]
+    model_torso = model_landmarks_result[0][11: 17]
+
+    input_torso = cls.array_of_landmarks_to_array_array(input_torso)
+    model_torso = cls.array_of_landmarks_to_array_array(model_torso)
+
+    input_torso = np.array(input_torso)
+    model_torso = np.array(model_torso)
+
+    input_transform, A_torso = cls.affine_transformation(model_torso, input_torso)
+
+    # TESTAR: affine antes de selecionar X affine depois de selecionar
+    
+    right_arm_angle        = cls.angle_between_limbs(input_transform[1], input_transform[3], input_transform[5])
+    right_forearm_angle    = cls.angle_between_limbs(input_transform[3], input_transform[1], input_transform[0])
+    right_arm_director     = cls.analyse_limb(start_point_array = input_transform[3], final_point_array = input_transform[5])
+    right_forearm_director = cls.analyse_limb(start_point_array = input_transform[1], final_point_array = input_transform[3])
+
+    left_arm_angle        = cls.angle_between_limbs(input_transform[0], input_transform[2], input_transform[4])
+    left_forearm_angle    = cls.angle_between_limbs(input_transform[2], input_transform[0], input_transform[1])
+    left_arm_director     = cls.analyse_limb(start_point_array = input_transform[2], final_point_array = input_transform[4])
+    left_forearm_director = cls.analyse_limb(start_point_array = input_transform[0], final_point_array = input_transform[2])
+
+    shoulders_director = cls.analyse_limb(start_point_array = input_transform[0], final_point_array = input_transform[1])
+
+    result = {
+      'upper_limbs' : {
+        'right' : {
+          'arm': {
+            'angle':  right_arm_angle,
+            'director': right_arm_director,
+          },
+          'forearm': {
+            'angle':  right_forearm_angle,
+            'director': right_forearm_director,
+          },
+        },
+        'left': {
+          'arm': {
+            'angle':  left_arm_angle,
+            'director': left_arm_director,
+          },
+          'forearm': {
+            'angle':  left_forearm_angle,
+            'director': left_forearm_director,
+          },
+        },
+      },
+      'shoulders': shoulders_director,   # só diretor ? ou ang tambem com o eixo X?
+      # 'pescoco': np.array([5, 5, 5]), # só diretor ? ou ang tambem com o eixo y?
+      'torso_affine': A_torso
+    }
+
+    return result
+    pass # analyse_torso_w_affine
+
   pass
