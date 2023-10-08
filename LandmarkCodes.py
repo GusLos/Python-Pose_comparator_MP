@@ -46,12 +46,12 @@ landmark_codes_pt_br = {
     'orelha_direita' : 8,
     'boca_esquerda' : 9,
     'boca_direita': 10,
-    'ombro_esquerdo': 11,
-    'ombro_direito': 12,
+    'ombro_esquerdo': 11,   
+    'ombro_direito': 12,    
     'cotovelo_esquerdo': 13,
-    'cotovelo_direito': 14,
-    'pulso_esquerdo': 15,
-    'pulso_direito': 16,
+    'cotovelo_direito': 14, 
+    'pulso_esquerdo': 15,   
+    'pulso_direito': 16,    
     'mindinho_esquerdo': 17,
     'mindinho_direito': 18,
     'indicador_esquerdo': 19,
@@ -69,4 +69,3 @@ landmark_codes_pt_br = {
     'indicador_pe_esquerdo': 31,
     'indicador_pe_direito': 32
 }
-

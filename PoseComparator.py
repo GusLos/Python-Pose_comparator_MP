@@ -7,6 +7,7 @@ from mediapipe.tasks.python.components.containers.landmark import Landmark
 # class ComparadorPose(metaclass=SingletonMeta):
 class PoseComparator():
 
+
   @staticmethod
   def landmark_to_array_default(landmark: Landmark) -> np.array:
     '''
@@ -22,6 +23,7 @@ class PoseComparator():
     '''
     return np.array([landmark.x, landmark.y, landmark.z])
     pass
+
 
   @staticmethod
   def landmark_to_array_as_int(landmark: Landmark, exponent: int = 5) -> np.array:
@@ -39,6 +41,7 @@ class PoseComparator():
     result = np.power(10, exponent)
     return (np.array([landmark.x, landmark.y, landmark.z]) * result).astype(int)
     pass
+
 
   @staticmethod
   def landmarks_result_to_array(landmark_result_list: list) -> np.array:
@@ -61,6 +64,7 @@ class PoseComparator():
     return np.array(landmark_result_array)
     pass # landmarks_result_to_array
 
+
   @staticmethod
   def create_vector (initial_point: np.array, end_point: np.array) -> np.array:
     '''
@@ -78,6 +82,7 @@ class PoseComparator():
     '''
     return end_point - initial_point
     pass
+
 
   @staticmethod
   def director_angles(vector: np.array) -> np.array:
@@ -101,7 +106,8 @@ class PoseComparator():
     # director_angle_k = np.arccos(vector[2]/vector_module)
     return np.array([ director_angle_i, director_angle_j, director_angle_k ])
     pass # director_angles
-  
+
+
   @staticmethod
   def angle_between_vectors(vector1: np.array, vector2: np.array) -> float:
     '''
@@ -124,6 +130,7 @@ class PoseComparator():
     angle = np.degrees(angle)
     return angle
     pass
+
 
   @classmethod
   def angle_between_limbs(cls, start_end, common_end, final_end):
@@ -156,6 +163,7 @@ class PoseComparator():
 
     return limbs_angle
     pass
+
 
   @classmethod
   def analyse_limb(cls, start_point_landmark = None, final_point_landmark = None, start_point_array = None, final_point_array = None) -> np.array:
@@ -193,6 +201,7 @@ class PoseComparator():
     return limb_director_angle
     pass
 
+
   @staticmethod
   def isLeft(start, middle, end) -> float:
     '''
@@ -214,6 +223,7 @@ class PoseComparator():
     # return [x > 0 , x]
     return x
     pass
+
 
   @classmethod
   def isLeft_XY (cls, start_point: Landmark, middle_point: Landmark, final_point: Landmark) -> float:
@@ -241,6 +251,7 @@ class PoseComparator():
     final_point_XY   = [final_point.x   , final_point.y  ]
     return cls.isLeft(start_point_XY, middle_point_XY, final_point_XY)
 
+
   @classmethod
   def isLeft_ZX (cls, start_point, middle_point, final_point) -> bool:
     '''
@@ -263,6 +274,7 @@ class PoseComparator():
     middle_point_ZX    = [middle_point.z    , middle_point.x   ]
     final_point_ZX   = [final_point.z   , final_point.x  ]
     return cls.isLeft(start_point_ZX, middle_point_ZX, final_point_ZX)
+
 
   @classmethod
   def isLeft_YZ (cls, start_point: Landmark, middle_point: Landmark, final_point: Landmark) -> float:
@@ -287,6 +299,7 @@ class PoseComparator():
     final_point_YZ  = [final_point.y , final_point.z ]
     return cls.isLeft(start_point_YZ, middle_point_YZ, final_point_YZ)
 
+
   @classmethod
   def isLeft_XYZ (cls, start_point: Landmark, middle_point: Landmark, final_point: Landmark) -> np.array:
     '''
@@ -310,6 +323,32 @@ class PoseComparator():
     isLeft_yz = cls.isLeft_YZ(start_point, middle_point, final_point)
     # return {'xy': isLeft_xy, 'zx': isLeft_zx, 'yz': isLeft_yz}
     return np.array([isLeft_xy, isLeft_zx, isLeft_yz])
+
+
+  # Mais usado nos braços, baseado no ponto final (se está para "cima" ou para "baixo"), uma mensagem é disponibilizada.
+  @classmethod
+  def is_up(cls, start_point, midle_point, end_point):
+      # No mediapipe pose, as coordenadas tem o centro de referencia proximo ao centro da cintura, logo
+      # o lado direito possui coordenada negativa para o x (-), mas o lado esquedo é positivo para x (x).
+      # Para ver se um ponto está a esquerda do braço basta ver se o resultado é negativo (-) ou positivo (+).
+
+      # Calcula em qual lado da reta está o último ponto, direita ou esquerda
+      # e no caso, verifica se o ponto pulso está a direita ou a esquerda da linha antebraço
+      arm_direction = cls.isLeft(start_point, midle_point, end_point)
+
+      # Pensando no braço direito, primeiro vejo se está a esquerda, ou no caso, para cima,
+      # depois verifico se a coordenada x é negativa, indicando que está no lado direito ou esquerdo
+      up = True if arm_direction <= 0 else False
+
+      if end_point[0] > 0:
+          arm_direction *= -1
+      else: 
+          up = not up
+
+      # Após as verificações retirna se está para cima
+      return up, arm_direction
+      pass
+
 
   @classmethod
   def affine_transformation (cls, base_model: np.array, input_pose: np.array) -> tuple[np.array, np.array]:
@@ -342,12 +381,14 @@ class PoseComparator():
     return input_transform, A
     pass # affine_transformation
 
+
   @classmethod
   def array_of_landmarks_to_array_array (cls, land_arr):
     for land in range(len(land_arr)):
       land_arr[land] = cls.landmark_to_array_default(land_arr[land])
     return land_arr
     pass
+
 
   @classmethod
   def analyse_torso_w_affine(cls, model_landmarks_result, input_landmarks_result) -> dict:
@@ -366,6 +407,8 @@ class PoseComparator():
     '''
     # input_torso = input_landmarks_result.pose_world_landmarks[0][11: 17]
     # model_torso = model_landmarks_result.pose_world_landmarks[0][11: 17]
+    # print(len(input_landmarks_result[0]))
+    # print(len(model_landmarks_result[0]))
     input_torso = input_landmarks_result[0][11: 17]
     model_torso = model_landmarks_result[0][11: 17]
 
@@ -377,8 +420,6 @@ class PoseComparator():
 
     input_transform, A_torso = cls.affine_transformation(model_torso, input_torso)
 
-    # TESTAR: affine antes de selecionar X affine depois de selecionar
-    
     right_arm_angle        = cls.angle_between_limbs(input_transform[1], input_transform[3], input_transform[5])
     right_forearm_angle    = cls.angle_between_limbs(input_transform[3], input_transform[1], input_transform[0])
     right_arm_director     = cls.analyse_limb(start_point_array = input_transform[3], final_point_array = input_transform[5])
@@ -421,5 +462,300 @@ class PoseComparator():
 
     return result
     pass # analyse_torso_w_affine
+
+
+  @classmethod
+  def analyse_torso_wo_affine(cls, input_landmarks_result) -> dict:
+    '''
+    Given a model landmarks result and a input landmarks result, analyse the torso, returning the angle and directors of the upper limbs.
+
+    #### Parameters
+      model_landmarks_result (landmark_results):
+        Results of the MediaPipe pose detection for the model pose.
+      input_landmarks_result (landmark_results):
+        Results of the MediaPipe pose detection for the input pose.
+    
+    #### Results
+      dict:
+        Dictionary with the angles and directors for the limbs.
+    '''
+    # input_torso = input_landmarks_result.pose_world_landmarks[0][11: 17]
+    # print(len(input_landmarks_result[0]))
+    input_torso = input_landmarks_result[0][11: 17]
+    nose = input_landmarks_result[0][0]
+
+    input_torso = cls.array_of_landmarks_to_array_array(input_torso)
+    nose = cls.landmark_to_array_default(nose)
+
+    input_torso = np.array(input_torso)
+    
+    # Right arm/limb analysis
+    right_arm_angle        = cls.angle_between_limbs(input_torso[1], input_torso[3], input_torso[5])
+    right_forearm_angle    = cls.angle_between_limbs(input_torso[3], input_torso[1], input_torso[0])
+    right_arm_director     = cls.analyse_limb(start_point_array = input_torso[3], final_point_array = input_torso[5])
+    right_forearm_director = cls.analyse_limb(start_point_array = input_torso[1], final_point_array = input_torso[3])
+
+    # Left arm/limb analysis
+    left_arm_angle        = cls.angle_between_limbs(input_torso[0], input_torso[2], input_torso[4])
+    left_forearm_angle    = cls.angle_between_limbs(input_torso[2], input_torso[0], input_torso[1])
+    left_arm_director     = cls.analyse_limb(start_point_array = input_torso[2], final_point_array = input_torso[4])
+    left_forearm_director = cls.analyse_limb(start_point_array = input_torso[0], final_point_array = input_torso[2])
+
+    # Shoulder analysis
+    shoulders_director = cls.analyse_limb(start_point_array = input_torso[0], final_point_array = input_torso[1])
+
+    # Neck analysis
+    neck_base_x = (input_torso[0][0] + input_torso[1][0]) / 2
+    neck_base_y = (input_torso[0][1] + input_torso[1][1]) / 2
+    neck_base_z = (input_torso[0][2] + input_torso[1][2]) / 2
+
+    neck_base = np.array([neck_base_x, neck_base_y, neck_base_z])
+
+    neck_vector = cls.create_vector(neck_base, nose)
+    neck_director = cls.director_angles(neck_vector)
+
+    result = {
+      'upper_limbs' : {
+        'right' : {
+          'arm': {
+            'angle':  right_arm_angle,
+            'director': right_arm_director,
+          },
+          'forearm': {
+            'angle':  right_forearm_angle,
+            'director': right_forearm_director,
+          },
+        },
+        'left': {
+          'arm': {
+            'angle':  left_arm_angle,
+            'director': left_arm_director,
+          },
+          'forearm': {
+            'angle':  left_forearm_angle,
+            'director': left_forearm_director,
+          },
+        },
+      },
+      'shoulders': shoulders_director,   # só diretor ? ou ang tambem com o eixo X?
+      'neck': neck_director, # só diretor ? ou ang tambem com o eixo y?
+    }
+
+    return result
+    pass # analyse_torso_w_affine
+
+
+  @classmethod
+  def compare_score(cls, input_dict, model_dict) -> float:
+    '''Closer to 0 = better.'''
+    acum_err = 0
+
+    acum_err += abs(input_dict['upper_limbs']['right']['arm']['angle'] -  model_dict['upper_limbs']['right']['arm']['angle']) 
+    # acum_err += abs(input_dict['upper_limbs']['right']['arm']['director'] -  model_dict['upper_limbs']['right']['arm']['director']).sum()
+    acum_err += abs(input_dict['upper_limbs']['right']['arm']['director'] -  model_dict['upper_limbs']['right']['arm']['director']).mean()
+    acum_err += abs(input_dict['upper_limbs']['right']['forearm']['angle'] -  model_dict['upper_limbs']['right']['forearm']['angle']) 
+    # acum_err += abs(input_dict['upper_limbs']['right']['forearm']['director'] -  model_dict['upper_limbs']['right']['forearm']['director']).sum()
+    acum_err += abs(input_dict['upper_limbs']['right']['forearm']['director'] -  model_dict['upper_limbs']['right']['forearm']['director']).mean()
+
+    acum_err += abs(input_dict['upper_limbs']['left']['arm']['angle'] -  model_dict['upper_limbs']['left']['arm']['angle']) 
+    # acum_err += abs(input_dict['upper_limbs']['left']['arm']['director'] -  model_dict['upper_limbs']['left']['arm']['director']).sum()
+    acum_err += abs(input_dict['upper_limbs']['left']['arm']['director'] -  model_dict['upper_limbs']['left']['arm']['director']).mean() 
+    acum_err += abs(input_dict['upper_limbs']['left']['forearm']['angle'] -  model_dict['upper_limbs']['left']['forearm']['angle']) 
+    # acum_err += abs(input_dict['upper_limbs']['left']['forearm']['director'] -  model_dict['upper_limbs']['left']['forearm']['director']).sum() 
+    acum_err += abs(input_dict['upper_limbs']['left']['forearm']['director'] -  model_dict['upper_limbs']['left']['forearm']['director']).mean() 
+
+    return acum_err
+    pass
+
+
+  @classmethod
+  def check_limb(cls, input_limb, model_limb, model_std):
+
+    diff = abs(input_limb -  model_limb) 
+    aceptable = True if diff < model_std else False
+
+    if (diff > (3*model_std)) : diff = (3*model_std)
+    if (diff < model_std) : diff = diff/2
+
+    max_diff = 3*model_std
+
+    # aceptable = False
+    # if (input_limb < (model_limb + model_std)) and (input_limb > (model_limb - model_std)):
+    #   aceptable = True
+
+    return [ aceptable, diff , max_diff]
+
+    pass # check_limb
+
+
+  @classmethod
+  def check_limb_direction_1(cls, input_limb, model_limb, model_std):
+    # Preciso comparar angulos, se > 90 está em um sentido, se < 90 em outro sentido
+    # Mas e se o angulo input for 95 e o desvio padrão for 8?
+    #   1 - verificar se +- a DP vai deixar nos dois sentidos, nesse caso deixa tudo true pois estã muito perto de 90
+    #       e o resto compara normal
+    #   2 - ver a diferença/ distancia para o limite? se o input +- o DP entrar no campo do modelo +- DP, considera verdadeiro?
+    #       (isso n é = a fazer 2*DP e ver se entra?)
+
+    if ((model_limb + model_std) > 90) and ((model_limb - model_std) < 90):
+      return [True, 0, 0]
+      pass
+
+    model_direction = model_limb > 90
+    input_direction = input_limb > 90
+
+    return [model_direction == input_direction , 0, 0]
+
+    pass # check_limb
+
+
+  @classmethod
+  def check_pose(cls, input_dict, pose_data_dict):
+    '''
+    input_dict = {
+      'upper_limbs' : {
+        'right' : {
+          'arm': {
+            'angle':  right_arm_angle,
+            'director': right_arm_director,
+          },
+          'forearm': {
+            'angle':  right_forearm_angle,
+            'director': right_forearm_director,
+          },
+        },
+        'left': {
+          'arm': {
+            'angle':  left_arm_angle,
+            'director': left_arm_director,
+          },
+          'forearm': {
+            'angle':  left_forearm_angle,
+            'director': left_forearm_director,
+          },
+        },
+      },
+      'shoulders': shoulders_director,   # só diretor ? ou ang tambem com o eixo X?
+      'neck': neck_director, # só diretor ? ou ang tambem com o eixo y?
+      # 'torso_affine': A_torso
+    }
+
+
+    pose_data_dict = {
+      'upper_limbs' : {
+        'right' : {
+          'arm': {
+            'angle'         : right_arm_angle,
+            'angle_std'     : right_arm_angle_std
+            'director_i'    : right_arm_director_i,
+            'director_i_std': right_arm_director_i_std,
+            'director_j'    : right_arm_director_j,
+            'director_j_std': right_arm_director_j_std,
+            'director_k'    : right_arm_director_k,
+            'director_k_std': right_arm_director_k_std,
+          },
+          'forearm': {
+            'angle'         : right_forearm_angle,
+            'angle_std'     : right_forearm_angle_std
+            'director_i'    : right_forearm_director_i,
+            'director_i_std': right_forearm_director_i_std,
+            'director_j'    : right_forearm_director_j,
+            'director_j_std': right_forearm_director_j_std,
+            'director_k'    : right_forearm_director_k,
+            'director_k_std': right_forearm_director_k_std,
+          },
+        },
+        'left' : {
+          'arm': {
+            'angle'         : left_arm_angle,
+            'angle_std'     : left_arm_angle_std
+            'director_i'    : left_arm_director_i,
+            'director_i_std': left_arm_director_i_std,
+            'director_j'    : left_arm_director_j,
+            'director_j_std': left_arm_director_j_std,
+            'director_k'    : left_arm_director_k,
+            'director_k_std': left_arm_director_k_std,
+          },
+          'forearm': {
+            'angle'         : left_forearm_angle,
+            'angle_std'     : left_forearm_angle_std
+            'director_i'    : left_forearm_director_i,
+            'director_i_std': left_forearm_director_i_std,
+            'director_j'    : left_forearm_director_j,
+            'director_j_std': left_forearm_director_j_std,
+            'director_k'    : left_forearm_director_k,
+            'director_k_std': left_forearm_director_k_std,
+          },
+        },
+      },
+      'shoulders': {
+        director_i     : shoulders_director_i,
+        director_i_std : shoulders_director_i_std,
+        director_j     : shoulders_director_j,
+        director_j_std : shoulders_director_j_std,
+        director_k     : shoulders_director_k,
+        director_k_std : shoulders_director_k_std,
+      },   
+      'neck': {
+        director_i     : neck_director_i,
+        director_i_std : neck_director_i_std,
+        director_j     : neck_director_j,
+        director_j_std : neck_director_j_std,
+        director_k     : neck_director_k,
+        director_k_std : neck_director_k_std,
+      }
+    }
+    '''
+    
+    result = {
+      'upper_limbs' : {
+        'right' : {
+          'arm': {
+            'angle'      : cls.check_limb(input_dict['upper_limbs']['right']['arm']['angle']      , pose_data_dict['upper_limbs']['right']['arm']['angle']     , pose_data_dict['upper_limbs']['right']['arm']['angle_std']), 
+            'director_i' : cls.check_limb(input_dict['upper_limbs']['right']['arm']['director'][0], pose_data_dict['upper_limbs']['right']['arm']['director_i'], pose_data_dict['upper_limbs']['right']['arm']['director_i_std']),
+            'director_j' : cls.check_limb(input_dict['upper_limbs']['right']['arm']['director'][1], pose_data_dict['upper_limbs']['right']['arm']['director_j'], pose_data_dict['upper_limbs']['right']['arm']['director_j_std']),
+            'director_k' : cls.check_limb(input_dict['upper_limbs']['right']['arm']['director'][2], pose_data_dict['upper_limbs']['right']['arm']['director_k'], pose_data_dict['upper_limbs']['right']['arm']['director_k_std']),
+            # 'director_i' : cls.check_limb_direction_1(input_dict['upper_limbs']['right']['arm']['director'][0], pose_data_dict['upper_limbs']['right']['arm']['director_i'], pose_data_dict['upper_limbs']['right']['arm']['director_i_std']),
+            # 'director_j' : cls.check_limb_direction_1(input_dict['upper_limbs']['right']['arm']['director'][1], pose_data_dict['upper_limbs']['right']['arm']['director_j'], pose_data_dict['upper_limbs']['right']['arm']['director_j_std']),
+            # 'director_k' : cls.check_limb_direction_1(input_dict['upper_limbs']['right']['arm']['director'][2], pose_data_dict['upper_limbs']['right']['arm']['director_k'], pose_data_dict['upper_limbs']['right']['arm']['director_k_std']),
+          },
+          'forearm': {
+            'angle'      : cls.check_limb(input_dict['upper_limbs']['right']['forearm']['angle']      , pose_data_dict['upper_limbs']['right']['forearm']['angle']     , pose_data_dict['upper_limbs']['right']['forearm']['angle_std']),
+            'director_i' : cls.check_limb(input_dict['upper_limbs']['right']['forearm']['director'][0], pose_data_dict['upper_limbs']['right']['forearm']['director_i'], pose_data_dict['upper_limbs']['right']['forearm']['director_i_std']),
+            'director_j' : cls.check_limb(input_dict['upper_limbs']['right']['forearm']['director'][1], pose_data_dict['upper_limbs']['right']['forearm']['director_j'], pose_data_dict['upper_limbs']['right']['forearm']['director_j_std']),
+            'director_k' : cls.check_limb(input_dict['upper_limbs']['right']['forearm']['director'][2], pose_data_dict['upper_limbs']['right']['forearm']['director_k'], pose_data_dict['upper_limbs']['right']['forearm']['director_k_std']),
+          },
+        },
+        'left' : {
+          'arm': {
+            'angle'      : cls.check_limb(input_dict['upper_limbs']['left']['arm']['angle']      , pose_data_dict['upper_limbs']['left']['arm']['angle']     , pose_data_dict['upper_limbs']['left']['arm']['angle_std']), 
+            'director_i' : cls.check_limb(input_dict['upper_limbs']['left']['arm']['director'][0], pose_data_dict['upper_limbs']['left']['arm']['director_i'], pose_data_dict['upper_limbs']['left']['arm']['director_i_std']),
+            'director_j' : cls.check_limb(input_dict['upper_limbs']['left']['arm']['director'][1], pose_data_dict['upper_limbs']['left']['arm']['director_j'], pose_data_dict['upper_limbs']['left']['arm']['director_j_std']),
+            'director_k' : cls.check_limb(input_dict['upper_limbs']['left']['arm']['director'][2], pose_data_dict['upper_limbs']['left']['arm']['director_k'], pose_data_dict['upper_limbs']['left']['arm']['director_k_std']),
+          },
+          'forearm': {
+            'angle'      : cls.check_limb(input_dict['upper_limbs']['left']['forearm']['angle']      , pose_data_dict['upper_limbs']['left']['forearm']['angle']     , pose_data_dict['upper_limbs']['left']['forearm']['angle_std']),
+            'director_i' : cls.check_limb(input_dict['upper_limbs']['left']['forearm']['director'][0], pose_data_dict['upper_limbs']['left']['forearm']['director_i'], pose_data_dict['upper_limbs']['left']['forearm']['director_i_std']),
+            'director_j' : cls.check_limb(input_dict['upper_limbs']['left']['forearm']['director'][1], pose_data_dict['upper_limbs']['left']['forearm']['director_j'], pose_data_dict['upper_limbs']['left']['forearm']['director_j_std']),
+            'director_k' : cls.check_limb(input_dict['upper_limbs']['left']['forearm']['director'][2], pose_data_dict['upper_limbs']['left']['forearm']['director_k'], pose_data_dict['upper_limbs']['left']['forearm']['director_k_std']),
+          },
+        },
+      },
+      'shoulders': {
+        'director_i' : cls.check_limb(input_dict['shoulders'][0], pose_data_dict['shoulders']['director_i'], pose_data_dict['shoulders']['director_i_std']),
+        'director_j' : cls.check_limb(input_dict['shoulders'][1], pose_data_dict['shoulders']['director_j'], pose_data_dict['shoulders']['director_j_std']),
+        'director_k' : cls.check_limb(input_dict['shoulders'][2], pose_data_dict['shoulders']['director_k'], pose_data_dict['shoulders']['director_k_std']),
+      },   
+      'neck': {
+        'director_i' : cls.check_limb(input_dict['neck'][0], pose_data_dict['neck']['director_i'], pose_data_dict['neck']['director_i_std']),
+        'director_j' : cls.check_limb(input_dict['neck'][1], pose_data_dict['neck']['director_j'], pose_data_dict['neck']['director_j_std']),
+        'director_k' : cls.check_limb(input_dict['neck'][2], pose_data_dict['neck']['director_k'], pose_data_dict['neck']['director_k_std']),
+      }
+    }
+
+    return result
+
+    pass
+
 
   pass
