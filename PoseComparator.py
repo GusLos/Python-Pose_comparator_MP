@@ -464,7 +464,7 @@ class PoseComparator():
     pass # analyse_torso_w_affine
 
 
-  @classmethod
+  @classmethod # arm <-> forearm concertado
   def analyse_torso_wo_affine(cls, input_landmarks_result) -> dict:
     '''
     Given a model landmarks result and a input landmarks result, analyse the torso, returning the angle and directors of the upper limbs.
@@ -490,16 +490,16 @@ class PoseComparator():
     input_torso = np.array(input_torso)
     
     # Right arm/limb analysis
-    right_arm_angle        = cls.angle_between_limbs(input_torso[1], input_torso[3], input_torso[5])
-    right_forearm_angle    = cls.angle_between_limbs(input_torso[3], input_torso[1], input_torso[0])
-    right_arm_director     = cls.analyse_limb(start_point_array = input_torso[3], final_point_array = input_torso[5])
-    right_forearm_director = cls.analyse_limb(start_point_array = input_torso[1], final_point_array = input_torso[3])
+    right_forearm_angle        = cls.angle_between_limbs(input_torso[1], input_torso[3], input_torso[5])
+    right_arm_angle    = cls.angle_between_limbs(input_torso[3], input_torso[1], input_torso[0])
+    right_forearm_director     = cls.analyse_limb(start_point_array = input_torso[3], final_point_array = input_torso[5])
+    right_arm_director = cls.analyse_limb(start_point_array = input_torso[1], final_point_array = input_torso[3])
 
     # Left arm/limb analysis
-    left_arm_angle        = cls.angle_between_limbs(input_torso[0], input_torso[2], input_torso[4])
-    left_forearm_angle    = cls.angle_between_limbs(input_torso[2], input_torso[0], input_torso[1])
-    left_arm_director     = cls.analyse_limb(start_point_array = input_torso[2], final_point_array = input_torso[4])
-    left_forearm_director = cls.analyse_limb(start_point_array = input_torso[0], final_point_array = input_torso[2])
+    left_forearm_angle        = cls.angle_between_limbs(input_torso[0], input_torso[2], input_torso[4])
+    left_arm_angle    = cls.angle_between_limbs(input_torso[2], input_torso[0], input_torso[1])
+    left_forearm_director     = cls.analyse_limb(start_point_array = input_torso[2], final_point_array = input_torso[4])
+    left_arm_director = cls.analyse_limb(start_point_array = input_torso[0], final_point_array = input_torso[2])
 
     # Shoulder analysis
     shoulders_director = cls.analyse_limb(start_point_array = input_torso[0], final_point_array = input_torso[1])

@@ -17,18 +17,15 @@ global model_data
 global pose_now
 
 
-# global landmark_colors
-# global connection_colors
-# global pose_connections
 landmark_colors = {
 	1: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
 	2: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
 	3: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
 	7: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
 	9: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
-	11: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
-	13: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
-	15: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	11: DrawingSpec(color=(0, 0, 255), thickness=5, circle_radius=2), 
+	13: DrawingSpec(color=(0, 0, 255), thickness=5, circle_radius=2), 
+	15: DrawingSpec(color=(255, 255, 255), thickness=5, circle_radius=2), 
 	17: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
 	19: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
 	21: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
@@ -53,7 +50,44 @@ landmark_colors = {
     26: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
     28: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
     30: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
-	0: 	DrawingSpec(color=(224, 224, 224), thickness=2, circle_radius=2)
+	0: 	DrawingSpec(color=(224, 224, 224), thickness=2, circle_radius=2),
+    33: 	DrawingSpec(color=(224, 224, 224), thickness=2, circle_radius=2)
+}
+landmark_colors_standard = {
+	1: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	2: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	3: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	7: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	9: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	11: DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+	13: DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+	15: DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2), 
+	17: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	19: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	21: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	23: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	25: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	27:	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	29:	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	31: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	32: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	4: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	5: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	6: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	8: 	DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	10: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	12: DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+	14: DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+	16: DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2), 
+	18: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+	20: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    22: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    24: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    26: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    28: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    30: DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+	0: 	DrawingSpec(color=(224, 224, 224), thickness=2, circle_radius=2),
+    33: 	DrawingSpec(color=(224, 224, 224), thickness=2, circle_radius=2)
 }
 connection_colors = {
     (0, 1): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
@@ -90,21 +124,89 @@ connection_colors = {
     (29, 31): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
     (30, 32): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
     (27, 31): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
-    (28, 32): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2)
+    (28, 32): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (0 , 33): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2)
+    }
+connection_colors_standard = {
+    (0, 1): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (1, 2): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (2, 3): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (3, 7): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (0, 4): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (4, 5): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (5, 6): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (6, 8): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (9, 10): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (11, 12): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (11, 13): DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2),
+    (13, 15): DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+    (15, 17): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (15, 19): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (15, 21): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (17, 19): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (12, 14): DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+    (14, 16): DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2), 
+    (16, 18): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (16, 20): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (16, 22): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (18, 20): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (11, 23): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (12, 24): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (23, 24): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (23, 25): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (24, 26): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (25, 27): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (26, 28): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (27, 29): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (28, 30): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (29, 31): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (30, 32): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (27, 31): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2), 
+    (28, 32): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2),
+    (0 , 33): DrawingSpec(color=(0, 0, 0), thickness=2, circle_radius=2)
     }
 pose_connections = [
-    (0, 1), (1, 2), (2, 3), (3, 7), (0, 4), (4, 5),
-    (5, 6), (6, 8), (9, 10), (11, 12), (11, 13),
-    (13, 15), (15, 17), (15, 19), (15, 21), (17, 19),
-    (12, 14), (14, 16), (16, 18), (16, 20), (16, 22),
-    (18, 20), (11, 23), (12, 24), (23, 24), (23, 25),
-    (24, 26), (25, 27), (26, 28), (27, 29), (28, 30),
-    (29, 31), (30, 32), (27, 31), (28, 32)]
+    (0, 1), 
+    (1, 2), 
+    (2, 3), 
+    (3, 7), 
+    (0, 4), 
+    (4, 5),
+    (5, 6), 
+    (6, 8), 
+    (9, 10), 
+    (11, 12), 
+    (11, 13),
+    (13, 15), 
+    (15, 17), 
+    (15, 19), 
+    (15, 21), 
+    (17, 19),
+    (12, 14), 
+    (14, 16), 
+    (16, 18), 
+    (16, 20), 
+    (16, 22),
+    (18, 20), 
+    (11, 23), 
+    (12, 24), 
+    (23, 24), 
+    (23, 25),
+    (24, 26), 
+    (25, 27), 
+    (26, 28), 
+    (27, 29), 
+    (28, 30),
+    (29, 31), 
+    (30, 32), 
+    (27, 31), 
+    (28, 32), 
+    (0 , 33)]
 
 
 # Calcula a cor (em BGR (0, 0, 0)) para pintar o alvo, quanto mais perto do valor alvo, mais verde
 def color_feedback(target_value, value, value_std, min_value = 0, max_value = 50):
-    
+
     # Verifica a diferença entre o alvo e o valor testado
     difference = abs( target_value - value )
 
@@ -135,10 +237,10 @@ def draw_landmarks_on_image(
         rgb_image, 
         detection_result, 
         pose_connections = pose_connections, 
-        landmark_colors = landmark_colors, 
-        connection_colors = connection_colors
+        landmark_colors = landmark_colors_standard, 
+        connection_colors = connection_colors_standard
         ):
-    
+
     pose_landmarks_list = detection_result.pose_landmarks
     annotated_image = np.copy(rgb_image.numpy_view())
 
@@ -146,10 +248,10 @@ def draw_landmarks_on_image(
         pose_landmarks = pose_landmarks_list[idx]
 
         pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+        print(pose_landmarks_proto)
         pose_landmarks_proto.landmark.extend([
             landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in pose_landmarks
         ])
-
         solutions.drawing_utils.draw_landmarks(
             annotated_image,
             pose_landmarks_proto,
@@ -260,15 +362,14 @@ def directions(pose):
     left_arm_up  = PC.is_up(left_shoulder, left_elbow, left_wrist)
     right_arm_up = PC.is_up(right_shoulder, right_elbow, right_wrist)
 
-    # Develve mensagem ideal tanto para direita quanto para esquerda
     return left_arm_up, right_arm_up
 
 
 # Função para gerar cores das landmarks de acordo com a proximidade do angulo certo
 def get_custom_landmark_colors(base_data, pose_data):
+    
     # Carregando as cores padrões para desenhar na imagem
     custom_landmark_colors = landmark_colors
-
     # Calculando cores para usar nos resultados
     right_arm_color = color_feedback(target_value=base_data['upper_limbs']['right']['arm']['angle'],value=pose_data['upper_limbs']['right']['arm']['angle'], value_std=base_data['upper_limbs']['right']['arm']['angle_std'])
     left_arm_color  = color_feedback(target_value=base_data['upper_limbs']['left']['arm']['angle'],value=pose_data['upper_limbs']['left']['arm']['angle'], value_std=base_data['upper_limbs']['left']['arm']['angle_std'])
@@ -284,25 +385,61 @@ def get_custom_landmark_colors(base_data, pose_data):
     pass
 
 
+# Função para pegar especificamente as cores segundo os angulos diretores de um vetor
+def director_color(director, director_std, value, x_weight=0.333, y_weight=0.333, z_weight=0.333):
+
+    director_x_color = color_feedback(target_value=director[0],value=value[0], value_std=director_std[0], max_value=20)
+    director_y_color = color_feedback(target_value=director[1],value=value[1], value_std=director_std[1], max_value=20)
+    director_z_color = color_feedback(target_value=director[2],value=value[2], value_std=director_std[2], max_value=20)
+
+    director_blue  = (x_weight*director_x_color[0]) + (y_weight*director_y_color[0]) + (z_weight*director_z_color[0])
+    director_green = (x_weight*director_x_color[1]) + (y_weight*director_y_color[1]) + (z_weight*director_z_color[1])
+    director_red   = (x_weight*director_x_color[2]) + (y_weight*director_y_color[2]) + (z_weight*director_z_color[2])
+
+    director_final_color = (director_blue, director_green, director_red)
+
+    return director_final_color
+    pass
+
+
+
 def get_custom_connection_colors(base_data, pose_data):
 
     custom_connection_colors = connection_colors
 
-    # color_feedback(target_value=base_data['upper_limbs']['right']['arm']['angle'],value=pose_data['upper_limbs']['right']['arm']['angle'], value_std=base_data['upper_limbs']['right']['arm']['angle_std'])
-    color_feedback()
+    right_arm_color     = director_color(director=base_data['upper_limbs']['right']['arm']['director'], director_std=base_data['upper_limbs']['right']['arm']['director_std'], value=pose_data['upper_limbs']['right']['arm']['director'])
+    right_forearm_color = director_color(director=base_data['upper_limbs']['right']['forearm']['director'], director_std=base_data['upper_limbs']['right']['forearm']['director_std'], value=pose_data['upper_limbs']['right']['forearm']['director'])
 
-    print(pose_data)
+    left_arm_color     = director_color(director=base_data['upper_limbs']['left']['arm']['director'], director_std=base_data['upper_limbs']['left']['arm']['director_std'], value=pose_data['upper_limbs']['left']['arm']['director'])
+    left_forearm_color = director_color(director=base_data['upper_limbs']['left']['forearm']['director'], director_std=base_data['upper_limbs']['left']['forearm']['director_std'], value=pose_data['upper_limbs']['left']['forearm']['director'])
+
+    # shoulders = director_color(director=base_data['shoulders']['director'], director_std=base_data['shoulders']['director_std'], value=pose_data['shoulders'], x_weight=0.45, y_weight=0.45, z_weight=0.1)
+    shoulders = color_feedback(base_data['shoulders']['director'][0], pose_data['shoulders'][0], base_data['shoulders']['director_std'][0])
+
+    # neck = director_color(director=base_data['neck']['director'], director_std=base_data['neck']['director_std'], value=pose_data['neck'], x_weight=0.45, y_weight=0.45, z_weight=0.1)
+    neck = color_feedback(base_data['neck']['director'][0], pose_data['neck'][0], base_data['neck']['director_std'][0])
 
     # Definindo cores de acordo com a "landmark"
-    # custom_connection_colors[(14, 16)].color = right_arm_color
-    # custom_connection_colors[(12, 14)].color = right_arm_color
-    # custom_connection_colors[(14, 16)].thickness = 4
-    # custom_connection_colors[(12, 14)].thickness = 4
+    custom_connection_colors[(12, 14)].color = right_arm_color
+    custom_connection_colors[(12, 14)].thickness = 10
 
-    # custom_connection_colors[(13, 15)].color = left_arm_color
-    # custom_connection_colors[(11, 13)].color = left_arm_color
-    # custom_connection_colors[(13, 15)].thickness = 4
-    # custom_connection_colors[(11, 13)].thickness = 4
+    custom_connection_colors[(14, 16)].color = right_forearm_color
+    custom_connection_colors[(14, 16)].thickness = 10
+
+
+    custom_connection_colors[(13, 15)].color = left_forearm_color
+    custom_connection_colors[(13, 15)].thickness = 10
+
+    custom_connection_colors[(11, 13)].color = left_arm_color
+    custom_connection_colors[(11, 13)].thickness = 10
+
+    custom_connection_colors[(11, 12)].color = shoulders
+    custom_connection_colors[(11, 12)].thickness = 10
+
+    custom_connection_colors[(0 , 33)].color = neck
+    custom_connection_colors[(0 , 33)].thickness = 10
+
+    return custom_connection_colors
 
     pass
 
@@ -310,9 +447,14 @@ def get_custom_connection_colors(base_data, pose_data):
 # FAZER...
 # Método para validar pose
 def validar_pose(model_data, pose_data):
+
+
+
     # Carregando as cores customizadas para desenhar na imagem
     custom_landmark_colors = get_custom_connection_colors(model_data, pose_data)
     custom_connections_colors = get_custom_connection_colors(model_data, pose_data)
+
+
     
     return (custom_landmark_colors, custom_connections_colors)
     pass # validar_pose
@@ -334,19 +476,42 @@ def live_stream_method(result, output_image, timestamp_ms):
     # Pega a média dos dados salvos na variável global pose_now
     pose_mean = pose_now_mean()
 
-    # teste de verificar o sentido
-    teste_sentido = directions(pose_mean)
-
     # Analisar a pose atual / Extrair informações / Angulos e diretores
     pose_analysed = PC.analyse_torso_wo_affine(pose_mean)
 
-    # Carregando as cores customizadas para desenhar na imagem
-    # custom_colors = validar_pose(model_data, pose_analysed)
+    # teste de verificar o sentido
+    # sentido_es_di = directions(pose_mean)
+
+    # sentido_di = abs( sentido_es_di[1][1] - model_data['upper_limbs']['right']['arm']['direction'])
+    # sentido_es = abs( sentido_es_di[0][1] - model_data['upper_limbs']['left']['arm']['direction'])
+
+    # if (sentido_di < model_data['upper_limbs']['right']['arm']['direction']) and (sentido_es < model_data['upper_limbs']['left']['arm']['direction']):
+        # custom_landmark_colors = get_custom_landmark_colors(model_data, pose_analysed)
+    custom_connections_colors = get_custom_connection_colors(model_data, pose_analysed)
+    # else:
+        # custom_landmark_colors    = landmark_colors_standard
+        # custom_connections_colors = connection_colors_standard
+    #     pass
+
+    print(result.pose_landmarks[0][11])
+    print(result.pose_landmarks[0][12])
+    print('-----------------')
+    print(result.pose_landmarks[0][0])
+
+
+    result.pose_landmarks[0].append( NormalizedLandmark(
+        x = (result.pose_landmarks[0][11].x +  result.pose_landmarks[0][12].x) / 2,
+        y = (result.pose_landmarks[0][11].y +  result.pose_landmarks[0][12].y) / 2,
+        z = (result.pose_landmarks[0][11].z +  result.pose_landmarks[0][12].z) / 2,
+        visibility = (result.pose_landmarks[0][11].visibility +  result.pose_landmarks[0][12].visibility) / 2,
+        presence = (result.pose_landmarks[0][11].presence +  result.pose_landmarks[0][12].presence) / 2
+    ))
 
     # Desenhando resultado na imagem
-    annotated_image = draw_landmarks_on_image(rgb_image = output_image, detection_result = result)#, landmark_colors = custom_colors[0], connection_colors = custom_colors[1])
-
+    annotated_image = draw_landmarks_on_image(rgb_image = output_image, detection_result = result, connection_colors = custom_connections_colors)#, landmark_colors = custom_landmark_colors)
+    
     # Mostrando a imagem
+    annotated_image = cv2.flip(annotated_image, 1)
     cv2.imshow('frame', annotated_image )
     if cv2.waitKey(1) == ord('q'):
         os.abort()
@@ -361,8 +526,8 @@ if __name__ == "__main__":
     mp_model_path    = dotenv['MODEL_PATH_FULL']
     model_image_path = dotenv['MODEL_IMAGE']
 
-    # Iniciando o mediapipe
-    mppose = MPPose(model_path=mp_model_path, running_mode='live_stream', live_stream_method=live_stream_method, show_live_stream_result=False)
+    # Iniciando o mediapipe como omagem
+    mppose = MPPose(model_path=mp_model_path, running_mode='image', live_stream_method=live_stream_method, show_live_stream_result=False)
 
     # Carregando dados da pose
     model_data = ReadCSV().read_pose_data('eggs.csv')
@@ -375,9 +540,14 @@ if __name__ == "__main__":
         pass
 
     # Mostrando imagem modelo para usuário
-    model_image = cv2.imread(model_image_path)
+    # model_image = cv2.imread(model_image_path)
+    model = mppose.detect_pose(image_path=model_image_path)
+    model_image = mppose.draw_landmarks_on_image(model[0], model[1])
     model_image = cv2.resize(model_image,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
-    cv2.imshow('Iagem', model_image)
+    model_image = cv2.flip(model_image, 1)
+    cv2.imshow('Iagem', cv2.cvtColor(model_image, cv2.COLOR_RGB2BGR))
+
+    mppose.set_modo_operacao('live_stream')
 
     # Começando captura de imagem
     # Definindo webcam como entrada/captura de imagem
