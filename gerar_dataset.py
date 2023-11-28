@@ -10,21 +10,23 @@ import csv
 if __name__ == '__main__':
 
     dotenv = dotenv_values(".env")
-    model_path     = dotenv['MODEL_PATH_FULL']
-    image_folder_1 = dotenv['IMAGE_DATASET_FOLDER']
-    # image_folder_1 = dotenv['IMAGE_DATASET_FOLDER_1']
-    # image_folder_2 = dotenv['IMAGE_DATASET_FOLDER_2']
+    model_path = dotenv['MODEL_PATH_HEAVY']
+
+    
+    image_folder_1 = dotenv['IMAGE_DATASET_FOLDER_1']
+    # image_folder_1 = dotenv['IMAGENS_IA']
 
     mppose = MPPose(model_path, 'image')
 
     # for image_folder in [image_folder_1, image_folder_2]:
     for image_folder in [image_folder_1]:
 
-        with open('eggs.csv', 'w', newline='') as csvfile:
+        with open('pose.csv', 'w', newline='') as csvfile:
 
             spamwriter = csv.writer(csvfile, delimiter=';',quotechar=';', quoting=csv.QUOTE_MINIMAL)
 
             spamwriter.writerow(
+                # ['nome_pose'] +
                 ['right_arm_angle'] + ['right_arm_direction'] +
                 ['right_arm_director_i'] + ['right_arm_director_j'] + ['right_arm_director_k'] + 
                 ['right_forearm_angle'] + 
@@ -42,6 +44,7 @@ if __name__ == '__main__':
                 print(image_folder+ '\\' +file)
                 image_path = image_folder+ '\\' +file
                 image = mppose.detect_pose(image_path=image_path)
+                # input(image[1].pose_world_landmarks)
                 image_result = PoseComparator.analyse_torso_wo_affine(image[1].pose_world_landmarks)
 
 # ---------------------------------------------------------
@@ -54,12 +57,12 @@ if __name__ == '__main__':
                 # ))
 # ---------------------------------------------------------
 
-                imagem_result = mppose.draw_landmarks_on_image(image[0], image[1])
-                imagem_result = cv2.resize(imagem_result, None, fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
-                cv2.imshow(file, cv2.cvtColor(imagem_result, cv2.COLOR_RGB2BGR))
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-
+                # imagem_result = mppose.draw_landmarks_on_image(image[0], image[1])
+                # imagem_result = cv2.resize(imagem_result, None, fx=0.2, fy=0.2, interpolation = cv2.INTER_CUBIC)
+                # cv2.imshow(file, cv2.cvtColor(imagem_result, cv2.COLOR_RGB2BGR))
+                # cv2.waitKey(0)
+                # nome_pose = input('Pose: ')
+                # cv2.destroyAllWindows()
 
                 right_arm_angle        = image_result['upper_limbs']['right']['arm']['angle']
                 right_arm_direction    = PoseComparator.is_up(
@@ -103,18 +106,20 @@ if __name__ == '__main__':
 
                 # spamwriter.writerow([right_arm_angle, right_arm_director, right_forearm_angle, right_forearm_director, left_arm_angle, left_arm_director, left_forearm_angle, left_forearm_director, shoulders])
                 spamwriter.writerow(
-                    [right_arm_angle, right_arm_direction,
-                    right_arm_director_i, right_arm_director_j, right_arm_director_k, 
-                    right_forearm_angle, 
-                    right_forearm_director_i, right_forearm_director_j, right_forearm_director_k,
-                    left_arm_angle, left_arm_direction,
-                    left_arm_director_i, left_arm_director_j, left_arm_director_k,  
-                    left_forearm_angle, 
-                    left_forearm_director_i, left_forearm_director_j, left_forearm_director_k, 
-                    shoulders_i, shoulders_j, shoulders_k,
-                    # shoulders_x_diference, shoulders_y_diference,
-                    neck_i, neck_j, neck_k,
-                    # neck_x_diference, neck_y_diference
+                    [
+                        # nome_pose,
+                        right_arm_angle, right_arm_direction,
+                        right_arm_director_i, right_arm_director_j, right_arm_director_k, 
+                        right_forearm_angle, 
+                        right_forearm_director_i, right_forearm_director_j, right_forearm_director_k,
+                        left_arm_angle, left_arm_direction,
+                        left_arm_director_i, left_arm_director_j, left_arm_director_k,  
+                        left_forearm_angle, 
+                        left_forearm_director_i, left_forearm_director_j, left_forearm_director_k, 
+                        shoulders_i, shoulders_j, shoulders_k,
+                        # shoulders_x_diference, shoulders_y_diference,
+                        neck_i, neck_j, neck_k,
+                        # neck_x_diference, neck_y_diference
                     ]
                 )
                 # input('---')

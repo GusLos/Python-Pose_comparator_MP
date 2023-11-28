@@ -416,8 +416,8 @@ def get_custom_connection_colors(base_data, pose_data):
     # shoulders = director_color(director=base_data['shoulders']['director'], director_std=base_data['shoulders']['director_std'], value=pose_data['shoulders'], x_weight=0.45, y_weight=0.45, z_weight=0.1)
     shoulders = color_feedback(base_data['shoulders']['director'][0], pose_data['shoulders'][0], base_data['shoulders']['director_std'][0])
 
-    # neck = director_color(director=base_data['neck']['director'], director_std=base_data['neck']['director_std'], value=pose_data['neck'], x_weight=0.45, y_weight=0.45, z_weight=0.1)
-    neck = color_feedback(base_data['neck']['director'][0], pose_data['neck'][0], base_data['neck']['director_std'][0])
+    neck = director_color(director=base_data['neck']['director'], director_std=base_data['neck']['director_std'], value=pose_data['neck'], x_weight=0.45, y_weight=0.45, z_weight=0.1)
+    # neck = color_feedback(base_data['neck']['director'][1], pose_data['neck'][1], base_data['neck']['director_std'][1])
 
     # Definindo cores de acordo com a "landmark"
     custom_connection_colors[(12, 14)].color = right_arm_color
@@ -468,7 +468,7 @@ def live_stream_method(result, output_image, timestamp_ms):
     global pose_now
 
     # Limpa tela da ultima iteração
-    os.system('cls')
+    # os.system('cls')
 
     # Update da variável global com dados mais novos
     update_pose_now(result.pose_world_landmarks)
@@ -479,24 +479,9 @@ def live_stream_method(result, output_image, timestamp_ms):
     # Analisar a pose atual / Extrair informações / Angulos e diretores
     pose_analysed = PC.analyse_torso_wo_affine(pose_mean)
 
-    # teste de verificar o sentido
-    # sentido_es_di = directions(pose_mean)
 
-    # sentido_di = abs( sentido_es_di[1][1] - model_data['upper_limbs']['right']['arm']['direction'])
-    # sentido_es = abs( sentido_es_di[0][1] - model_data['upper_limbs']['left']['arm']['direction'])
 
-    # if (sentido_di < model_data['upper_limbs']['right']['arm']['direction']) and (sentido_es < model_data['upper_limbs']['left']['arm']['direction']):
-        # custom_landmark_colors = get_custom_landmark_colors(model_data, pose_analysed)
     custom_connections_colors = get_custom_connection_colors(model_data, pose_analysed)
-    # else:
-        # custom_landmark_colors    = landmark_colors_standard
-        # custom_connections_colors = connection_colors_standard
-    #     pass
-
-    print(result.pose_landmarks[0][11])
-    print(result.pose_landmarks[0][12])
-    print('-----------------')
-    print(result.pose_landmarks[0][0])
 
 
     result.pose_landmarks[0].append( NormalizedLandmark(
@@ -523,14 +508,14 @@ if __name__ == "__main__":
 
     # Ler variáveis
     dotenv = dotenv_values('.env')
-    mp_model_path    = dotenv['MODEL_PATH_FULL']
+    mp_model_path   = dotenv['MODEL_PATH_FULL']
     model_image_path = dotenv['MODEL_IMAGE']
 
     # Iniciando o mediapipe como omagem
     mppose = MPPose(model_path=mp_model_path, running_mode='image', live_stream_method=live_stream_method, show_live_stream_result=False)
 
     # Carregando dados da pose
-    model_data = ReadCSV().read_pose_data('eggs.csv')
+    model_data = ReadCSV().read_pose_data('pose.csv')
 
     # Cria variável para ler a entrada de jeito mais suave
     nn = 16
